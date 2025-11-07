@@ -4,6 +4,9 @@
 3. Create a `.env` file in the project root and add the following secret keys:
 ```
 UPHOLD_CLIENT_SECRET=<Add Your Secret Key Here>
+CURRENCY_PAIRS=<Comma-separated list of currency pairs (default: BTC-USD)>
+CHECK_INTERVAL_MS=<Enter a whole number, not a decimal (default: 5000)> 
+PRICE_THRESHOLD=<Enter any positive number (default: 0.01)>
 ```
 4. `npm install`
 
