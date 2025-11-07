@@ -24,6 +24,7 @@
     "vitest": "^4.0.8"
   },
   "dependencies": {
-    "@uphold/uphold-sdk-javascript": "^2.4.0"
+    "@uphold/uphold-sdk-javascript": "^2.4.0",
+    "axios": "^1.13.2"
   }
 }
