@@ -2,11 +2,11 @@ import axios from "axios";
 import * as readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 
-const PRICE_THRESHOLD = 0.01;
 const BASE_URL = "https://api-sandbox.uphold.com";
 const rl = readline.createInterface({ input, output });
 
 const lastPrices = new Map();
+let priceThreshold = 0.01;
 
 /**
  * Fetches ticker data for a given currency pair and logs if there's a price change
@@ -19,7 +19,7 @@ async function checkTicker(currencyPair) {
         const lastPrice = lastPrices.get(currencyPair) || 0;
         const difference = currentPrice - lastPrice;
 
-        if (Math.abs(difference) > PRICE_THRESHOLD) {
+        if (Math.abs(difference) > priceThreshold) {
             console.log(`Price change detected for ${currencyPair}: ${lastPrice} => ${currentPrice} (Change: ${difference})`);
             lastPrices.set(currencyPair, currentPrice);
         }
@@ -51,7 +51,12 @@ async function main() {
         checkIntervalMs = parseInt(enteredInterval);
     }
 
-    console.log(`Monitoring currency pairs: ${currencyPairs.join(', ')} every ${checkIntervalMs} ms`);
+    const enteredThreshold = await rl.question(`Please enter the price threshold for the alert [Default=0.01]: `); 
+    if (enteredThreshold.trim()) {
+        priceThreshold = parseFloat(enteredThreshold);
+    }
+
+    console.log(`Monitoring currency pairs: ${currencyPairs.join(', ')} every ${checkIntervalMs} ms, with price threshold: ${priceThreshold}`);
     rl.close();
 
     // Set axios timeout slightly less than the check interval to avoid overlaps
