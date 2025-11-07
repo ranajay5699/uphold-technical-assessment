@@ -1,12 +1,22 @@
 import axios from "axios";
-import * as readline from 'node:readline/promises';
-import { stdin as input, stdout as output } from 'node:process';
+import dotenv from "dotenv";
+dotenv.config();
 
 const BASE_URL = "https://api-sandbox.uphold.com";
-const rl = readline.createInterface({ input, output });
-
 const lastPrices = new Map();
-let priceThreshold = 0.01;
+
+const CURRENCY_PAIRS = process.env.CURRENCY_PAIRS
+  ? process.env.CURRENCY_PAIRS.split(",")
+  : ["BTC-USD"];
+const CHECK_INTERVAL_MS = process.env.CHECK_INTERVAL_MS
+  ? parseInt(process.env.CHECK_INTERVAL_MS)
+  : 5000;
+const PRICE_THRESHOLD = process.env.PRICE_THRESHOLD
+  ? parseFloat(process.env.PRICE_THRESHOLD)
+  : 0.01;
+
+// Set axios timeout slightly less than the check interval to avoid overlaps
+axios.defaults.timeout = (CHECK_INTERVAL_MS > 1000) ? CHECK_INTERVAL_MS - 1000 : 1000;
 
 /**
  * Fetches ticker data for a given currency pair and logs if there's a price change
@@ -19,7 +29,7 @@ async function checkTicker(currencyPair) {
         const lastPrice = lastPrices.get(currencyPair) || 0;
         const difference = currentPrice - lastPrice;
 
-        if (Math.abs(difference) > priceThreshold) {
+        if (Math.abs(difference) > PRICE_THRESHOLD) {
             console.log(`Price change detected for ${currencyPair}: ${lastPrice} => ${currentPrice} (Change: ${difference})`);
             lastPrices.set(currencyPair, currentPrice);
         }
@@ -38,33 +48,8 @@ async function checkAllTickers(currencyPairs) {
     return Promise.all(fetchPromises);
 }
 
-async function main() {
-    let checkIntervalMs = 5000;
-    let currencyPairs = ["BTC-USD"];
-    const enteredPairs = await rl.question(`Please enter the currency pairs to monitor (comma-separated) Ex: "BTC-USD,ETH-USD,LTC-USD" [Default=BTC-USD]: `);
-    if (enteredPairs.trim()) {
-        currencyPairs = enteredPairs.split(',').map(pair => pair.trim());
-    }
+console.log(`Monitoring currency pairs: ${CURRENCY_PAIRS.join(', ')} every ${CHECK_INTERVAL_MS} ms, with price threshold: ${PRICE_THRESHOLD}`);
 
-    const enteredInterval = await rl.question(`Please enter the interval to monitor in milliseconds [Default=5000]: `); 
-    if (enteredInterval.trim()) {
-        checkIntervalMs = parseInt(enteredInterval);
-    }
-
-    const enteredThreshold = await rl.question(`Please enter the price threshold for the alert [Default=0.01]: `); 
-    if (enteredThreshold.trim()) {
-        priceThreshold = parseFloat(enteredThreshold);
-    }
-
-    console.log(`Monitoring currency pairs: ${currencyPairs.join(', ')} every ${checkIntervalMs} ms, with price threshold: ${priceThreshold}`);
-    rl.close();
-
-    // Set axios timeout slightly less than the check interval to avoid overlaps
-    axios.defaults.timeout = (checkIntervalMs > 1000) ? checkIntervalMs - 1000 : 1000;
-
-    setInterval(async () => {
-        await checkAllTickers(currencyPairs)
-    }, checkIntervalMs);
-}
-
-main();
+setInterval(async () => {
+    await checkAllTickers(CURRENCY_PAIRS)
+}, CHECK_INTERVAL_MS);
