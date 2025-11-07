@@ -89,6 +89,28 @@ describe("Index.js Module", () => {
             consoleLogSpy.mockRestore();
             setIntervalSpy.mockRestore();
         });
+
+        describe("checkAllTickers", () => {
+            beforeEach(() => {
+                vi.resetModules();
+                vi.clearAllMocks();
+            });
+
+            it("should call checkTicker for each currency pair", async () => {
+                const currencyPairs = ["BTC-USD", "ETH-USD", "XRP-USD"];
+                const mockResponse = { data: { ask: "50000.01" } };
+                axios.get.mockResolvedValue(mockResponse);
+
+                // Import after mocking
+                const { checkAllTickers } = await import('./index.js');
+                await checkAllTickers(currencyPairs);
+
+                expect(axios.get).toHaveBeenCalledTimes(currencyPairs.length);
+                currencyPairs.forEach(pair => {
+                    expect(axios.get).toHaveBeenCalledWith(`https://api-sandbox.uphold.com/v0/ticker/${pair}`);
+                });
+            });
+        });
     });
 
 });
