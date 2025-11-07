@@ -1,0 +1,29 @@
+{
+  "name": "uphold-technical-assessment",
+  "version": "1.0.0",
+  "description": "Ticker Checker",
+  "homepage": "https://github.com/ranajay5699/uphold-technical-assessment#readme",
+  "bugs": {
+    "url": "https://github.com/ranajay5699/uphold-technical-assessment/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ranajay5699/uphold-technical-assessment.git"
+  },
+  "license": "MIT",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.1",
+    "vite": "^7.2.2",
+    "vitest": "^4.0.8"
+  },
+  "dependencies": {
+    "@uphold/uphold-sdk-javascript": "^2.4.0"
+  }
+}
