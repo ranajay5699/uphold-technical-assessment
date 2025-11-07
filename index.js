@@ -48,8 +48,14 @@ async function checkAllTickers(currencyPairs) {
     return Promise.all(fetchPromises);
 }
 
-console.log(`Monitoring currency pairs: ${CURRENCY_PAIRS.join(', ')} every ${CHECK_INTERVAL_MS} ms, with price threshold: ${PRICE_THRESHOLD}`);
+async function main() {
+  console.log(`Monitoring currency pairs: ${CURRENCY_PAIRS.join(', ')} every ${CHECK_INTERVAL_MS} ms, with price threshold: ${PRICE_THRESHOLD}`);
+  setInterval(async () => {
+      await checkAllTickers(CURRENCY_PAIRS)
+  }, CHECK_INTERVAL_MS);
+}
 
-setInterval(async () => {
-    await checkAllTickers(CURRENCY_PAIRS)
-}, CHECK_INTERVAL_MS);
+main();
+
+//Export functions for testing
+export { main, checkTicker, checkAllTickers};
